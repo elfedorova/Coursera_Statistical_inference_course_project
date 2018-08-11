@@ -1,0 +1,91 @@
+---
+title: "Part2. ToothGrowth Data Analysis"
+author: "Elena Fedorova"
+date: '11 August 2018'
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1. Overview
+
+The purpose of the this data analysis is to analyze the ToothGrowth data set by comparing the guinea tooth growth by supplement and dose.
+
+## 2. Loading the data and performing basic exploratory data analysis
+
+# How the data looks like
+```{r echo = TRUE}
+library(datasets)
+library(ggplot2)
+data(ToothGrowth)
+str(ToothGrowth)
+head(ToothGrowth)
+
+```
+
+# Plot the data
+```{r echo = TRUE}
+plot <- ggplot(ToothGrowth, 
+               aes(x=factor(dose),y=len,fill=factor(dose)))
+plot + geom_boxplot(notch=F) + facet_grid(.~supp) + scale_x_discrete("Dose (Mg)") +   
+     scale_y_continuous("Toothlength") +  
+     ggtitle("Guinea pig length of teeth by dosage by type of supplement")
+
+```
+
+The plots demonstrate that increasing dosage increases teethlength and orange juice is more effective for small dosage, while when dosage is higher (2mg) both types of supplements are equally effective.
+
+## Basic summary of the data
+```{r echo = TRUE}
+summary(ToothGrowth)
+table(ToothGrowth$supp, ToothGrowth$dose)
+```
+
+## Comparison of tooth growth by supp and dose by using confidence intervals
+
+#Hypothesis 1: "Orange juice & ascorbic acid deliver the same tooth growth across the data set"
+```{r echo = TRUE}
+h1<-t.test(len ~ supp, paired=F, var.equal=T, data=ToothGrowth)
+h1$conf.int
+h1$p.value
+```
+The confidence intervals includes 0 and the p-value is greater than the threshold of 0.05. The null hypothesis cannot be rejected.
+
+#Hypothesis 2: "For the dosage of 0.5 Mg/day, the two supps deliver the same tooth growth"
+```{r echo = TRUE}
+h2<-t.test(len ~ supp, paired=F, var.equal=T, data= subset(ToothGrowth, dose == 0.5))
+h2$conf.int
+h2$p.value
+```
+The confidence interval does not include 0 and the p-value is below the 0.05 threshold. The null hypothesis can be rejected. The alternative hypothesis that 0.5 mg/day dosage of orange juice delivers more tooth growth than ascorbic acid is accepted.
+
+# Hypothesis 3: "For the dosage of 1 mg/day, the two supps deliver the same tooth growth"
+```{r echo = TRUE}
+h3<-t.test(len ~ supp, paired=F, var.equal=T, data= subset(ToothGrowth, dose == 1))
+h3$conf.int
+h3$p.value
+```
+The confidence interval does not include 0 and the p-value is smaller than the 0.05 threshold. The null hypothesis can be rejected. The alternative hypothesis that 1 mg/day dosage of orange juice delivers more tooth growth than ascorbic acid is accepted.
+
+#Hypothesis 4: "For the dosage of 2 mg/day, the two supps deliver the same tooth growth"
+```{r echo = TRUE}
+h4<-t.test(len ~ supp, paired=F, var.equal=T, data= subset(ToothGrowth, dose == 2))
+h4$conf.int
+h4$p.value
+```
+The confidence interval does include 0 and the p-value is larger than the 0.05 threshold. The null hypothesis cannot be rejected.
+
+##Conclusions and the assumptions applied
+
+#Conclusions
+Orange juice is more effective supplement for tooth growth than ascorbic acid for dosages 0.5 Mg and 1.0 Mg per day. Orange juice and ascorbic acid are the same effective supplements when applied with dosage of 2.0 Mg per day. 
+In general, however, based on the data provided we cannot conclude tha orange juice is more effective that ascorbic acid as a supplement for toogth growth.
+
+#Assumptions
+
+1) Toothlength data are normally distributed
+2) No other factors affected tooth length
